@@ -18,7 +18,9 @@ model_type = "TI"
 
 # Rain-snow partitioning method
 # 1 = single threshold
-# 2 = dual threshold
+# 2 = dual threshold 
+  # The rain-snow elevation method in SNOW17 is not implemented here
+# 3 = precipitation phase assigned as part of forcing data
 rain_snow = 1
 
 ################################################################################
@@ -30,8 +32,12 @@ rain_snow = 1
 ############################    PARAMETERS    ##################################
 ################################################################################
 
-# Rain-snow threshold 
+# Single rain-snow threshold; rain_snow = 1
 rs_thresh = 2.5 #°C
+
+# Dual rain-snow threshold; rain_snow = 2
+snow_thresh_max = 1.0 #°C, max temperature at which precip is all snow
+rain_thresh_min = 4.0 #°C, min temperature at which precip is all rain
 
 # Maximum degree day factor
 ddf_max = 2 #mm/day/°C

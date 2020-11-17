@@ -4,13 +4,18 @@
 # kjennings@lynkertech.com
 # 2020-11-12
 
+################################################################################
 # Load packages
 # Will throw error if not installed
 library(tidyverse)
 library(lubridate)
 
+################################################################################
 # Initialize model type and parameters
 source("config/snow17r_params.R")
+
+################################################################################
+# Import forcing data
 
 # If data_type = "SNOTEL", grab snotel data
 if(data_type == "SNOTEL"){
@@ -19,12 +24,27 @@ if(data_type == "SNOTEL"){
   forcing <- read.csv(paste0("data/", data_string))
 }
 
+################################################################################
+# Compute model data outside of time loop
+# Because SNOW-17 is a simple model, computational time can be saved by
+# performing many operations outside of the time loop
+
 # Assign precipitation phase
 # 0 = snow, 1 = rain
 if(rain_snow == 1){
   forcing <- forcing %>% 
     mutate(ppt_phase = case_when(tair_c <= rs_thresh ~ 0,
                              TRUE ~ 1))
+} if(rain_snow == 2){
+  forcing <- forcing %>% 
+    mutate(ppt_phase = case_when(tair_c <= snow_thresh_max ~ 0,
+                                 tair_c >  rain_thresh_min ~ 1,
+                                 TRUE ~ tair_c - snow_thresh_max / 
+                                   (rain_thresh_min - snow_thresh_max)))
+} if(rain_snow == 3){
+  # NEED WAY TO DEFINE 
+} else{
+  print("Missing or incorrect precipitation phase method specified")
 }
 
 # Compute snowfall and rainfall
@@ -49,22 +69,45 @@ forcing <- forcing %>%
   mutate(swe_mm = NA)
 forcing[1, "swe_mm"] = swe_init
 
-# Perform time loop to compute SWE and actual melt
-for(i in 2:length(forcing$date)){
-  # Add new snowfall to SWE
-  if(forcing[i, "snowfall_mm"] > 0){
-    forcing[i, "swe_mm"] = forcing[i - 1, "swe_mm"] + forcing[i, "snowfall_mm"]
-  } else {
-    if(forcing[i, "melt_pot_mm"] > 0){
-      forcing[i, "swe_mm"] = forcing[i - 1, "swe_mm"] - forcing[i, "melt_pot_mm"]
-    } else{
-      forcing[i, "swe_mm"] = forcing[i - 1, "swe_mm"]
+################################################################################
+# Time loop for model
+
+#
+if(model_type == "TI"){
+  # Perform time loop to compute SWE and actual melt
+  for(i in 2:length(forcing$date)){
+    # Add new snowfall to SWE
+    if(forcing[i, "snowfall_mm"] > 0){
+      forcing[i, "swe_mm"] = forcing[i - 1, "swe_mm"] + forcing[i, "snowfall_mm"]
+    } else {
+      if(forcing[i, "melt_pot_mm"] > 0){
+        forcing[i, "swe_mm"] = forcing[i - 1, "swe_mm"] - forcing[i, "melt_pot_mm"]
+      } else{
+        forcing[i, "swe_mm"] = forcing[i - 1, "swe_mm"]
+      }
     }
-  }
+    
+    # Check that SWE is not negative (from too much melt)
+    if(forcing[i, "swe_mm"] < 0){
+      forcing[i, "swe_mm"] = 0
+    } # no else needed
+    
+  } # end time loop
+} # end model_type == TI
+
+# SNOW17 model implementation
+# Based on Anderson (2006)
+if(model_type == "SNOW17"){
   
-  # Check that SWE is not negative (from too much melt)
-  if(forcing[i, "swe_mm"] < 0){
-    forcing[i, "swe_mm"] = 0
-  } # no else needed
-  
-}
+} 
+
+
+################################################################################
+#
+
+# Plot
+plotly::ggplotly(
+  ggplot(forcing, aes(date, swe_mm)) + 
+    geom_line(color = "purple") + 
+    geom_line(data = forcing, aes(date, swe_obs_mm), color = "black") + 
+    ylim(0,500))
