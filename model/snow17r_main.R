@@ -10,6 +10,9 @@
 library(tidyverse)
 library(lubridate)
 
+# Initialize model in brackets 
+# Allows code to stop and print errors
+{
 ################################################################################
 # Initialize model type and parameters
 source("config/snow17r_params.R")
@@ -35,16 +38,16 @@ if(rain_snow == 1){
   forcing <- forcing %>% 
     mutate(ppt_phase = case_when(tair_c <= rs_thresh ~ 0,
                              TRUE ~ 1))
-} if(rain_snow == 2){
+} else if(rain_snow == 2){
   forcing <- forcing %>% 
     mutate(ppt_phase = case_when(tair_c <= snow_thresh_max ~ 0,
                                  tair_c >  rain_thresh_min ~ 1,
                                  TRUE ~ tair_c - snow_thresh_max / 
                                    (rain_thresh_min - snow_thresh_max)))
-} if(rain_snow == 3){
+} else if(rain_snow == 3){
   # NEED WAY TO DEFINE 
 } else{
-  print("Missing or incorrect precipitation phase method specified")
+  stop("Missing or incorrect precipitation phase method specified")
 }
 
 # Compute snowfall and rainfall
@@ -111,3 +114,6 @@ plotly::ggplotly(
     geom_line(color = "purple") + 
     geom_line(data = forcing, aes(date, swe_obs_mm), color = "black") + 
     ylim(0,500))
+}
+
+# Need some of export function here
