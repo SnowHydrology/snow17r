@@ -21,7 +21,7 @@ model_type = "TI"
 # 2 = dual threshold 
   # The rain-snow elevation method in SNOW17 is not implemented here
 # 3 = precipitation phase assigned as part of forcing data
-rain_snow = 1
+rain_snow = 2
 
 ################################################################################
 #########################    END USER OPTIONS    ###############################
