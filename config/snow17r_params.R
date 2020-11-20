@@ -52,7 +52,7 @@ ddf_max = 2 #mm/day/°C
 ddf_min = 1 #mm/day/°C
 
 # Air temperature above which melt can occur
-tair_melt_thresh = 0 #°C
+tair_melt_thresh = 1 #°C
 
 # Initial SWE
 swe_init = 0 #mm (only change if you wish to start model from a known state)
