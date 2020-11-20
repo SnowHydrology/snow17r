@@ -14,7 +14,7 @@ library(lubridate)
 # Allows code to stop and print errors
 {
 ################################################################################
-# Initialize model type and parameters
+# Initialize model type, mode, and parameters
 source("config/snow17r_params.R")
 
 ################################################################################
@@ -25,6 +25,16 @@ if(data_type == "SNOTEL"){
   source("config/snow17r_snotel.R")
 } else {
   forcing <- read.csv(paste0("data/", data_string))
+}
+  
+################################################################################
+# Run model in normal or calibration mode
+if(model_mode == "NORMAL"){
+  source()
+} else if(model_mode == "CALIBRATION"){
+  source()
+} else{
+  stop("Missing or incorrect model mode specified. Options are NORMAL or CALIBRATION.")
 }
 
 ################################################################################

@@ -16,6 +16,12 @@ data_string = "testdata.csv"
 # SNOW17 (Anderson 2006)
 model_type = "TI"
 
+# Identify model mode
+# Options are:
+# NORMAL
+# CALIBRATION
+model_mode = "NORMAL"
+
 # Rain-snow partitioning method
 # 1 = single threshold
 # 2 = dual threshold 
